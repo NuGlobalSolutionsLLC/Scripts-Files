@@ -11,6 +11,7 @@ def header(title):
 
 
 def save_to(content, filename):
+    print(f"Saving {filename}")
     with open(f"output/{filename}", "w") as output:
         output.write(content)
 
@@ -43,12 +44,10 @@ def process_timeseries():
     # Output JavaScript files
     print()
     print(f"Gathered {len(data)} rows from all files.")
-    print(f"Saving timeseriesData.js")
     save_to(
         f"export default {json.dumps(result)};",
         "timeseriesData.js"
     )
-    print(f"Saving tcedata.js")
     save_to(
         f"var tcedata = {json.dumps(data)};",
         "tcedata.js"
