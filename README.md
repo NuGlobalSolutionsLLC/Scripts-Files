@@ -24,9 +24,11 @@ There are two input folders in the cloned code:
 - `app/data`. The script will take every shapefile in this folder and will convert it into a GeoJSON file. These files are the ones used to plot the features on the map and there should be one shapefile/GeoJSON for each layer in the table of contents of the app.
 - `app/timeseries`. Then, it will take every file in this folder to build the JavaScript files (`timeseriesData.js` and its equivalent `tcedata.js`).
 
-Place the files accordingly. There a little more information on the README.md file in each of these folders.
+Place the files accordingly. There is a little more information on the `README.md` file in each of these folders.
 
 ## Run the script
+
+Open the terminal in the folder where you cloned the repo and type:
 
 ```
 docker-compose run all
@@ -37,7 +39,7 @@ All output files will be placed in the `output` folder.
 When running the previous command you should exect an output similar to the following one:
 
 ```
-Creating timeseries_all_run ... done
+Creating scripts-files_all_run ... done
 
 *******************************************************************
 * WARNING: Output folder contains files, they may be overwritten. *
