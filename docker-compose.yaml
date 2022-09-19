@@ -1,0 +1,10 @@
+version: "2"
+services:
+  all:
+    container_name: "all"
+    build:
+      context: ./
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./:/app
