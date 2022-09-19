@@ -1,4 +1,4 @@
-# Set up script to build JSON and JS files
+# Build JSON and JS files for the AFP4 apps
 
 ## Description
 
