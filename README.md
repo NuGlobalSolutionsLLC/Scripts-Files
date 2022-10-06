@@ -17,14 +17,15 @@ Install Docker Compose following the instructions at https://docs.docker.com/com
 
 Clone this repository to your computer.
 
-## Prepare the data
+## Prepare the data   
 
-There are two input folders in the cloned code:
+Shapefiles must be in WGS 1984 prj.
+There are two input folders in the cloned code where you will put the shapefiles:
 
 - `app/data`. The script will take every shapefile in this folder and will convert it into a GeoJSON file. These files are the ones used to plot the features on the map and there should be one shapefile/GeoJSON for each layer in the table of contents of the app.
 - `app/timeseries`. Then, it will take every file in this folder to build the JavaScript files (`timeseriesData.js` and its equivalent `tcedata.js`).
 
-Place the files accordingly. There is a little more information on the `README.md` file in each of these folders.
+Place the files accordingly. There is a little more information on the `README.md` file in each of these folders about what shapefiles go in them.
 
 ## Run the script
 
