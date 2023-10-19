@@ -29,7 +29,7 @@ Place the files accordingly. There is a little more information on the `README.m
 
 ## Run the script
 
-Open the cmd or windows powershell terminal to the cloned repo folder and type:
+Open the cmd or windows powershell terminal to this cloned repo folder (Scripts-Files) and type:
 
 ```
 docker-compose run all
