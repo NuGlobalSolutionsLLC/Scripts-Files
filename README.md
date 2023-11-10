@@ -37,7 +37,7 @@ docker-compose run all
 
 All output files will be placed in the `output` folder.
 
-When running the previous command you should exect an output similar to the following one:
+When running the previous command you should expect an output similar to the following one:
 
 ```
 Creating scripts-files_all_run ... done
