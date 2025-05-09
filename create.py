@@ -73,6 +73,10 @@ def to_geojson(filename):
             'X_Coord': props.get('X_Coord'),
             'Y_Coord': props.get('Y_Coord'),
         }
+        data = {
+        'Contour': props.get('Contour'),
+        'Elevation': props.get('Elevation'),  # or whatever your elevation field is called
+        }
 
         if not all(data):
             raise MissingData(

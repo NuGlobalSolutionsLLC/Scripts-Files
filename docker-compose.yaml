@@ -1,4 +1,3 @@
-version: "2"
 services:
   all:
     container_name: "all"
