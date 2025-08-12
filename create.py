@@ -72,21 +72,22 @@ def to_geojson(filename):
             'Units': props.get('Units'),
             'X_Coord': props.get('X_Coord'),
             'Y_Coord': props.get('Y_Coord'),
-        }
-        data = {
-        'Contour': props.get('Contour'),
-        'Elevation': props.get('Elevation'),  # or whatever your elevation field is called
+            'Contour': props.get('Contour'),
+            'Elevation': props.get('Elevation'),
+            'Matrix': props.get('Matrix'),
+            'Analyte': props.get('Analyte'),
         }
 
-        if not all(data):
-            raise MissingData(
-                'Missing some of the fields on {}'.format(json.dumps(data))
-            )
+        # All specified essential attributes are now explicitly included in the 'data' dictionary.
+        # Allowing None values for fields that are not present in the input shapefile for a given feature.
+        # This addresses the "missing fields" issue by ensuring the keys are always present in the output.
+        # If a feature has a 'Well_ID' of null in the input, it will be null in the output.
+        # The downstream WebGIS platforms should then handle these nulls appropriately.
 
         features.append({
             "type": "Feature",
             "properties": data,
-            "geometry": feature.get("geometry")
+            "geometry": feature.get("geometry").__geo_interface__
         })
 
     file.close()
@@ -111,10 +112,11 @@ def to_timeseries(filename):
             'Well_ID': props.get('Well_ID', props.get('SWLOC_ID'))
         }
 
-        if not all(data):
-            raise MissingData(
-                'Missing some of the fields on {}'.format(json.dumps(data))
-            )
+        # All specified essential attributes are now explicitly included in the 'data' dictionary.
+        # Allowing None values for fields that are not present in the input shapefile for a given feature.
+        # This addresses the "missing fields" issue by ensuring the keys are always present in the output.
+        # If a feature has a 'Well_ID' of null in the input, it will be null in the output.
+        # The downstream WebGIS platforms should then handle these nulls appropriately.
 
         json.append(data)
     return json
