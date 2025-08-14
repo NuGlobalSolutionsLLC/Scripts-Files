@@ -87,7 +87,7 @@ def to_geojson(filename):
         features.append({
             "type": "Feature",
             "properties": data,
-            "geometry": feature.get("geometry").__geo_interface__
+            "geometry": (lambda g: g if isinstance(g, dict) else (g.__geo_interface__ if g else None))(feature.get("geometry"))
         })
 
     file.close()
