@@ -22,8 +22,7 @@ def process_data():
         output_name = str(filename).replace("data/", "").replace(".shp", ".json")
         print(f"Converting {filename} >>> {output_name}")
         geojson = to_geojson(filename)
-        save_to(json.dumps(geojson), output_name)
-
+        save_to(json.dumps(geojson, indent=4), output_name)
 
 def process_timeseries():
     header("Reading timeseries folder and creating JS files")
@@ -65,17 +64,15 @@ def to_geojson(filename):
         props = feature.get('properties')
 
         data = {
-            'Well_ID': props.get('Well_ID', props.get('SWLOC_ID')),
-            'SDate': props.get('SDate'),
-            'Result': props.get('Result'),
-            'Lab_Flag': props.get('Lab_Flag'),
-            'Units': props.get('Units'),
-            'X_Coord': props.get('X_Coord'),
-            'Y_Coord': props.get('Y_Coord'),
-        }
-        data = {
-        'Contour': props.get('Contour'),
-        'Elevation': props.get('Elevation'),  # or whatever your elevation field is called
+    'Well_ID': props.get('Well_ID', props.get('SWLOC_ID')),
+    'SDate': props.get('SDate'),
+    'Result': props.get('Result'),
+    'Lab_Flag': props.get('Lab_Flag'),
+    'Units': props.get('Units'),
+    'X_Coord': props.get('X_Coord'),
+    'Y_Coord': props.get('Y_Coord'),
+    'Contour': props.get('Contour'),
+    'Elevation': props.get('Elevation'),
         }
 
         if not all(data):
