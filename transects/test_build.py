@@ -24,6 +24,18 @@ class SelectionTests(unittest.TestCase):
         self.assertNotIn('not deployed', live)
         self.assertIn('screen positioning is awaiting GIS review', live)
         self.assertIn('Position comparison', live)
+        self.assertIn('data-review-banners="shown"', live)
+
+    def test_presentation_only_hides_banners_not_comparison_or_data(self):
+        args = ('BB', 'max', '<svg></svg>', 'data.json', 'app.js', 'style.css')
+        shown = page(*args, production_review=True)
+        hidden = page(*args, production_review=True, hide_review_banners=True)
+        self.assertEqual(hidden, shown.replace('data-review-banners="shown"', 'data-review-banners="hidden"'))
+        self.assertIn('Position comparison', hidden)
+        self.assertIn('Position check', hidden)
+        self.assertIn('data-source="data.json"', hidden)
+        with self.assertRaisesRegex(ValueError, 'authorized production review'):
+            page(*args, hide_review_banners=True)
 
     def test_latest_does_not_mean_largest(self):
         rows=[{'date':'2024-01-01','result':99},{'date':'2025-01-01','result':0},{'date':'2025-01-01','result':1}]

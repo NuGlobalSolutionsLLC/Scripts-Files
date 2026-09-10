@@ -105,7 +105,8 @@ def write_asset(root, name, content):
     return relative.as_posix()
 
 
-def page(sec, mode, svg, data_url, script_url, style_url, production_review=False):
+def page(sec, mode, svg, data_url, script_url, style_url, production_review=False, hide_review_banners=False):
+    require(not hide_review_banners or production_review, 'Hiding review banners requires an authorized production review')
     title = sec[0] + '–' + sec[1]
     options = ''.join(f'<option value="{a}">{html.escape(label)}</option>' for a, label in LABELS.items())
     modes = ''.join(f'<option value="{m}"{" selected" if m == mode else ""}>{label}</option>'
@@ -118,7 +119,7 @@ def page(sec, mode, svg, data_url, script_url, style_url, production_review=Fals
 <title>AFP4 transect {title} — {"Most Recent" if mode == "mr" else "Maximum Value"}</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="{style_url}"></head>
-<body data-section="{sec}" data-mode="{mode}" data-source="{data_url}">
+<body data-section="{sec}" data-mode="{mode}" data-source="{data_url}" data-review-banners="{'hidden' if hide_review_banners else 'shown'}">
 <header><h1>Transect {title}</h1><a href="./" id="map-link">Map View</a></header>
 <p class="preview">{notice}</p>
 <div class="controls"><label>Data display <select id="mode">{modes}</select></label>
@@ -138,8 +139,10 @@ def main():
     parser.add_argument('--transects', type=pathlib.Path, required=True, help='B–F source ZIP; its older A–A is deliberately ignored')
     parser.add_argument('--aa', type=pathlib.Path, required=True, help='Complete replacement A–A ZIP')
     parser.add_argument('--output', type=pathlib.Path, required=True, help='New, empty, isolated build directory')
-    parser.add_argument('--production-review', action='store_true', help='Use only with explicit approval to publish while GIS review remains pending; retains all position warnings')
+    parser.add_argument('--production-review', action='store_true', help='Use only with explicit approval to publish while GIS review remains pending')
+    parser.add_argument('--hide-review-banners', action='store_true', help='Presentation-only: hide the two review banners with explicit approval; retains comparison, data, and position checks')
     args = parser.parse_args()
+    require(not args.hide_review_banners or args.production_review, 'Hiding review banners requires an authorized production review')
     require(not args.output.exists(), 'Output must be a new directory; never overwrite an application or earlier build')
     base_stems = {f's2{s.lower()}_{m}' for s in SECTIONS[1:] for m in ['mr', 'max']}
     datasets = archive(args.transects, base_stems)
@@ -169,15 +172,16 @@ def main():
         data_url = write_asset(args.output, f'{sec}.json', json.dumps(data, separators=(',', ':'), allow_nan=False))
         for mode in ['mr', 'max']:
             filename = f's2{sec.lower()}_{mode}.html'
-            (args.output / filename).write_text(page(sec, mode, svg, data_url, app_url, style_url, args.production_review))
+            (args.output / filename).write_text(page(sec, mode, svg, data_url, app_url, style_url, args.production_review, args.hide_review_banners))
             files.append(filename)
     review = {'productionReady': False, 'reason': 'Local draft: coordinate reconciliation and release approval are required.',
               'productionReviewRequested': args.production_review, 'geometryApproved': False,
+              'reviewBannersVisible': not args.hide_review_banners,
               'selectionPolicy': 'Latest date retains every distinct result; maximum retains every tied sample date. No averages, invented flags or old-history gap filling.',
               'geometryPolicy': 'Preview presents original screen geometry and joined attributes separately. No coordinate choice or geographic reprojection is applied.',
               'sources': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in [args.transects, args.aa]}, 'sections': sections}
     if args.production_review:
-        review['reason'] = 'User authorized production publication for client review; coordinate authority remains unresolved and warnings are retained.'
+        review['reason'] = 'User authorized production publication for client review; coordinate authority remains unresolved. Banner visibility is a presentation choice, not geometry approval.'
     (args.output / 'validation.json').write_text(json.dumps(review, indent=2) + '\n')
     links = ''.join(f'<li><a href="{f}">{f}</a></li>' for f in files)
     (args.output / 'review.html').write_text(f'<!doctype html><html lang="en"><meta charset="utf-8"><title>AFP4 local transect review</title><h1>AFP4 local transect review</h1><p>Not deployed. Review all six sections, three analytes and both display modes.</p><ul>{links}</ul><a href="validation.json">Validation report</a></html>')

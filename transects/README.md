@@ -8,9 +8,16 @@ any Private GIS, Public GIS, Storymap, server, authentication, or main-map data.
 The user explicitly requested deployment to the existing production pages after
 being advised that coordinate authority remains unresolved. The deployed build
 is `build/production-20260909T1604Z-v2/`, built with `--production-review`.
-It retains the position-comparison control and GIS-review warnings, and does not
+It retains the position-comparison control and per-well position checks, and does not
 represent geometry as approved (`geometryApproved: false`). The default builder
 still creates a local-only preview; do not deploy that preview as-is.
+
+September 10 presentation update: build with `--production-review
+--hide-review-banners` to hide only the two yellow banner messages, as explicitly
+requested. This does not change the source data, marker coordinates, history,
+comparison control, per-well position checks, or unresolved geometry status.
+See `releases/2026-09-10.md`; the current build is
+`build/production-20260910T0021Z/`.
 
 ## Inputs and repeatable build
 
@@ -141,8 +148,9 @@ updates. Do not point it at an already-rebuilt output.
    stable transect page URLs. All new JS, JSON, and PNG asset names are hashed.
 
 For an explicitly authorized production review, `--production-review` changes
-only the publication notice/metadata; it does not resolve geometry, remove
-warnings, or select a different coordinate source. See the September 9 release
+only the publication notice/metadata; it does not resolve geometry or select a
+different coordinate source. `--hide-review-banners` additionally hides the two
+banner messages without changing the underlying position checks. See the release
 record before using it. `sync_release.py --build <build> --application <app>`
 installs the 27 verified generated files into a clean local application's
 `public/` directory, preserving unrelated files and old assets. It performs no
