@@ -1,0 +1,140 @@
+{
+  "AA": {
+    "width": 1300.0,
+    "height": 500.0,
+    "xDomain": [
+      0.0,
+      13400.0
+    ],
+    "yDomain": [
+      440.0,
+      660.0
+    ],
+    "xRange": [
+      26.0,
+      1138.0
+    ],
+    "yRange": [
+      382.0,
+      17.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 414,
+    "elevationExaggeration": 20
+  },
+  "BB": {
+    "width": 1300.0,
+    "height": 500.0,
+    "xDomain": [
+      0.0,
+      12850.0
+    ],
+    "yDomain": [
+      425.0,
+      660.0
+    ],
+    "xRange": [
+      24.0,
+      1154.0
+    ],
+    "yRange": [
+      434.0,
+      17.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 453,
+    "elevationExaggeration": 20
+  },
+  "CC": {
+    "width": 1300.0,
+    "height": 500.0,
+    "xDomain": [
+      0.0,
+      12000.0
+    ],
+    "yDomain": [
+      485.0,
+      630.0
+    ],
+    "xRange": [
+      24.0,
+      1154.0
+    ],
+    "yRange": [
+      280.0,
+      21.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 289,
+    "elevationExaggeration": 20
+  },
+  "DD": {
+    "width": 1300.0,
+    "height": 630.0,
+    "xDomain": [
+      0.0,
+      12800.0
+    ],
+    "yDomain": [
+      425.0,
+      755.0
+    ],
+    "xRange": [
+      30.0,
+      1174.0
+    ],
+    "yRange": [
+      614.0,
+      16.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 1632,
+    "elevationExaggeration": 20
+  },
+  "EE": {
+    "width": 1300.0,
+    "height": 690.0,
+    "xDomain": [
+      0.0,
+      11500.0
+    ],
+    "yDomain": [
+      437.5,
+      710.0
+    ],
+    "xRange": [
+      30.0,
+      1190.0
+    ],
+    "yRange": [
+      587.0,
+      30.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 1810,
+    "elevationExaggeration": 20
+  },
+  "FF": {
+    "width": 1300.0,
+    "height": 580.0,
+    "xDomain": [
+      0.0,
+      12200.0
+    ],
+    "yDomain": [
+      430.0,
+      710.0
+    ],
+    "xRange": [
+      24.0,
+      1164.0
+    ],
+    "yRange": [
+      532.0,
+      14.0
+    ],
+    "imageWidth": 1200,
+    "imageHeight": 610,
+    "elevationExaggeration": 20
+  }
+}

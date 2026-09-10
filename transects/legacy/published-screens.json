@@ -1,0 +1,470 @@
+{
+  "AA/BSS-A": {
+    "x": 1091,
+    "y": 188,
+    "width": 4,
+    "height": 6
+  },
+  "AA/GMI-22-02M": {
+    "x": 693,
+    "y": 92,
+    "width": 4,
+    "height": 42
+  },
+  "AA/GMI-22-03M": {
+    "x": 928,
+    "y": 124,
+    "width": 4,
+    "height": 37
+  },
+  "AA/HM-106": {
+    "x": 191,
+    "y": 58,
+    "width": 4,
+    "height": 24
+  },
+  "AA/HM-117": {
+    "x": 498,
+    "y": 91,
+    "width": 4,
+    "height": 33
+  },
+  "AA/HM-121": {
+    "x": 594,
+    "y": 89,
+    "width": 4,
+    "height": 32
+  },
+  "AA/HM-72": {
+    "x": 309,
+    "y": 80,
+    "width": 4,
+    "height": 16
+  },
+  "AA/HM-73": {
+    "x": 249,
+    "y": 83,
+    "width": 4,
+    "height": 16
+  },
+  "AA/HM-98": {
+    "x": 409,
+    "y": 81,
+    "width": 4,
+    "height": 16
+  },
+  "AA/USGS08PL": {
+    "x": 27,
+    "y": 308,
+    "width": 4,
+    "height": 50
+  },
+  "AA/WCHMHTA004": {
+    "x": 547,
+    "y": 109,
+    "width": 4,
+    "height": 17
+  },
+  "AA/WITCTA014": {
+    "x": 809,
+    "y": 121,
+    "width": 4,
+    "height": 15
+  },
+  "AA/WITCTA015": {
+    "x": 914,
+    "y": 131,
+    "width": 4,
+    "height": 18
+  },
+  "AA/WITCTA016": {
+    "x": 886,
+    "y": 124,
+    "width": 4,
+    "height": 25
+  },
+  "AA/WITCTA024": {
+    "x": 970,
+    "y": 130,
+    "width": 4,
+    "height": 16
+  },
+  "AA/WITCTA026": {
+    "x": 1031,
+    "y": 149,
+    "width": 4,
+    "height": 9
+  },
+  "BB/HM-30": {
+    "x": 530,
+    "y": 82,
+    "width": 4,
+    "height": 16
+  },
+  "BB/HM-41": {
+    "x": 473,
+    "y": 74,
+    "width": 4,
+    "height": 18
+  },
+  "BB/P-2": {
+    "x": 579,
+    "y": 132,
+    "width": 4,
+    "height": 70
+  },
+  "BB/P-24M": {
+    "x": 220,
+    "y": 224,
+    "width": 4,
+    "height": 91
+  },
+  "BB/P-25M": {
+    "x": 443,
+    "y": 236,
+    "width": 4,
+    "height": 69
+  },
+  "BB/P-27U": {
+    "x": 365,
+    "y": 174,
+    "width": 4,
+    "height": 17
+  },
+  "BB/P-5M": {
+    "x": 310,
+    "y": 230,
+    "width": 4,
+    "height": 68
+  },
+  "BB/P-7M": {
+    "x": 396,
+    "y": 165,
+    "width": 4,
+    "height": 50
+  },
+  "BB/USGS07T": {
+    "x": 1152,
+    "y": 273,
+    "width": 4,
+    "height": 39
+  },
+  "BB/USGS09PL": {
+    "x": 170,
+    "y": 360,
+    "width": 4,
+    "height": 35
+  },
+  "BB/W-144": {
+    "x": 366,
+    "y": 65,
+    "width": 4,
+    "height": 17
+  },
+  "BB/WS-12": {
+    "x": 943.5,
+    "y": 345,
+    "width": 4,
+    "height": 35
+  },
+  "CC/FT09-12B": {
+    "x": 1095.5,
+    "y": 75,
+    "width": 4,
+    "height": 17
+  },
+  "CC/GMI-22-01M": {
+    "x": 584,
+    "y": 81.6,
+    "width": 4,
+    "height": 28
+  },
+  "CC/GMI-22-06M": {
+    "x": 400,
+    "y": 87.6,
+    "width": 4,
+    "height": 19
+  },
+  "CC/GMI-22-07M": {
+    "x": 166,
+    "y": 85.6,
+    "width": 4,
+    "height": 16
+  },
+  "CC/LF04-02": {
+    "x": 1020.8,
+    "y": 91.6,
+    "width": 4,
+    "height": 10
+  },
+  "CC/LF05-14": {
+    "x": 936.8,
+    "y": 73.6,
+    "width": 4,
+    "height": 16
+  },
+  "CC/LF05-5G": {
+    "x": 963.8,
+    "y": 73.6,
+    "width": 4,
+    "height": 23
+  },
+  "CC/USGS01T": {
+    "x": 22,
+    "y": 78.6,
+    "width": 4,
+    "height": 19
+  },
+  "CC/USGS06T": {
+    "x": 712.8,
+    "y": 80.6,
+    "width": 4,
+    "height": 18
+  },
+  "CC/USGS07T": {
+    "x": 1161.2,
+    "y": 28.6,
+    "width": 4,
+    "height": 10
+  },
+  "CC/WITCTA006": {
+    "x": 222,
+    "y": 85.6,
+    "width": 4,
+    "height": 14
+  },
+  "CC/WITCTA007": {
+    "x": 242,
+    "y": 87.6,
+    "width": 4,
+    "height": 18
+  },
+  "CC/WITCTA010": {
+    "x": 308,
+    "y": 89.6,
+    "width": 4,
+    "height": 14
+  },
+  "CC/WITCTA012": {
+    "x": 367,
+    "y": 83.6,
+    "width": 4,
+    "height": 20
+  },
+  "CC/WITCTA016": {
+    "x": 473,
+    "y": 78.6,
+    "width": 4,
+    "height": 29
+  },
+  "DD/HM-14": {
+    "x": 448,
+    "y": 237.3,
+    "width": 4,
+    "height": 17
+  },
+  "DD/HM-40": {
+    "x": 346,
+    "y": 241.3,
+    "width": 4,
+    "height": 18
+  },
+  "DD/HM-46": {
+    "x": 256,
+    "y": 267.3,
+    "width": 4,
+    "height": 5
+  },
+  "DD/P-10M": {
+    "x": 82,
+    "y": 429.3,
+    "width": 4,
+    "height": 53
+  },
+  "DD/P-21U": {
+    "x": 302,
+    "y": 341.3,
+    "width": 4,
+    "height": 36
+  },
+  "DD/P-22M": {
+    "x": 154,
+    "y": 421.3,
+    "width": 4,
+    "height": 64
+  },
+  "DD/P-25M": {
+    "x": 241,
+    "y": 412.3,
+    "width": 4,
+    "height": 71
+  },
+  "DD/USGS09PL": {
+    "x": 28,
+    "y": 539.3,
+    "width": 4,
+    "height": 38
+  },
+  "EE/W-153": {
+    "x": 1153.6,
+    "y": 246.6,
+    "width": 4,
+    "height": 21
+  },
+  "EE/WS-2T": {
+    "x": 493,
+    "y": 606,
+    "width": 5,
+    "height": 82
+  },
+  "FF/HM-114": {
+    "x": 1163.3,
+    "y": 191,
+    "width": 4,
+    "height": 37
+  },
+  "FF/HM-69": {
+    "x": 803.3,
+    "y": 180,
+    "width": 4,
+    "height": 18
+  },
+  "FF/P-11M": {
+    "x": 766.3,
+    "y": 410,
+    "width": 4,
+    "height": 38
+  },
+  "FF/P-12M": {
+    "x": 718.3,
+    "y": 376,
+    "width": 4,
+    "height": 48
+  },
+  "FF/P-26M": {
+    "x": 649.3,
+    "y": 310,
+    "width": 4,
+    "height": 128
+  },
+  "FF/P-8M": {
+    "x": 935.3,
+    "y": 330,
+    "width": 4,
+    "height": 114
+  },
+  "FF/P-8UN": {
+    "x": 937.3,
+    "y": 286,
+    "width": 4,
+    "height": 22
+  },
+  "FF/WJETA050": {
+    "x": 1046.3,
+    "y": 220,
+    "width": 4,
+    "height": 18
+  },
+  "FF/WJEUS008": {
+    "x": 1025.3,
+    "y": 254,
+    "width": 4,
+    "height": 7
+  },
+  "FF/WL-118JETA": {
+    "x": 998.3,
+    "y": 206,
+    "width": 4,
+    "height": 36
+  },
+  "EE/HM-95": {
+    "x": 1050.6,
+    "y": 238.6,
+    "width": 4,
+    "height": 20
+  },
+  "EE/P-18US": {
+    "x": 1052.6,
+    "y": 300.6,
+    "width": 4,
+    "height": 21
+  },
+  "EE/P-22M": {
+    "x": 669.6,
+    "y": 393.6,
+    "width": 4,
+    "height": 73
+  },
+  "EE/P-22U": {
+    "x": 667.6,
+    "y": 284.6,
+    "width": 4,
+    "height": 31
+  },
+  "EE/P-29M": {
+    "x": 625.6,
+    "y": 414.6,
+    "width": 4,
+    "height": 40
+  },
+  "EE/P-5M": {
+    "x": 758.6,
+    "y": 375.6,
+    "width": 4,
+    "height": 80
+  },
+  "EE/P-5UN": {
+    "x": 762.6,
+    "y": 297.6,
+    "width": 4,
+    "height": 11
+  },
+  "EE/RW-11U": {
+    "x": 991.6,
+    "y": 243.6,
+    "width": 4,
+    "height": 31
+  },
+  "EE/RW-1U": {
+    "x": 973.6,
+    "y": 237.6,
+    "width": 4,
+    "height": 40
+  },
+  "BB/EPA-2": {
+    "x": 690,
+    "y": 59,
+    "width": 4,
+    "height": 16
+  },
+  "DD/EPA-3": {
+    "x": 486,
+    "y": 239.3,
+    "width": 4,
+    "height": 17
+  },
+  "EE/P-4": {
+    "x": 711.6,
+    "y": 322.6,
+    "width": 4,
+    "height": 12
+  },
+  "EE/P-5U": {
+    "x": 761.6,
+    "y": 335.6,
+    "width": 4,
+    "height": 13
+  },
+  "FF/P-1": {
+    "x": 639.3,
+    "y": 250,
+    "width": 4,
+    "height": 74
+  },
+  "FF/P-12U": {
+    "x": 713.3,
+    "y": 230,
+    "width": 4,
+    "height": 21
+  }
+}
