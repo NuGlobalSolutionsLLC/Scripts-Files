@@ -1,4 +1,4 @@
-# AFP4 transect rebuild — local review draft
+# AFP4 transect builder
 
 This isolated builder replaces the twelve frozen A–F `s2*_mr.html` and
 `s2*_max.html` applications with maintainable static pages. It does not modify
@@ -18,6 +18,12 @@ requested. This does not change the source data, marker coordinates, history,
 comparison control, per-well position checks, or unresolved geometry status.
 See `releases/2026-09-10.md`; the current build is
 `build/production-20260910T0021Z/`.
+
+The user subsequently authorized merging the four existing PRs and aligning
+`main` with production. See `../ops/releases/2026-09-10-main-sync.md` for the full
+application-build comparison and tracked nginx configuration. Merge approval
+does not resolve the remaining GIS questions or change this builder's default
+local-preview behavior.
 
 ## Inputs and repeatable build
 
