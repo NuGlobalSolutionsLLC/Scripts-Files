@@ -19,6 +19,7 @@ function dateSummary(samples) {
   if (dates.length <= 2) return dates.join(' / ');
   return `${dates.length} dates: ${dates[0]} – ${dates.at(-1)}`;
 }
+const coordinateKey = markers => markers.map(m => JSON.stringify(m.coordinates)).sort().join('|');
 
 async function start() {
   const response = await fetch(document.body.dataset.source, { cache: 'no-cache' });
@@ -108,10 +109,11 @@ async function start() {
     for (const well of data.wells) {
       const samples = selectSamples(well.samples[analyte] || [], mode);
       const markers = markersFor(well, analyte, mode, position, data.layout);
-      const shape = markersFor(well, analyte, mode, 'shape', data.layout).map(m => m.coordinates);
-      const joined = markersFor(well, analyte, mode, 'joined', data.layout).map(m => m.coordinates);
-      const different = JSON.stringify(shape) !== JSON.stringify(joined);
-      const review = markers.length > 1 || different;
+      const corrected = markersFor(well, analyte, mode, 'joinedX', data.layout);
+      const joined = markersFor(well, analyte, mode, 'joined', data.layout);
+      const elevationDifference = coordinateKey(corrected) !== coordinateKey(joined);
+      const originalXDifference = position === 'shape' && coordinateKey(markers) !== coordinateKey(corrected);
+      const review = markers.length > 1 || elevationDifference || originalXDifference;
       if (review) affected.push(well.id);
       for (const marker of markers) {
         const group = svgNode('g', { tabindex: 0, role: 'button', 'data-well': well.id,
@@ -135,7 +137,14 @@ async function start() {
       button.addEventListener('click', () => history(well));
       cell(row, button); cell(row, samples.length ? dateSummary(samples) : 'No samples');
       cell(row, [...new Set(samples.map(s => s.result))].map(number).join(' / ') || '—');
-      cell(row, review ? `${markers.length} position(s)${different ? '; coordinate fields disagree' : '; review needed'}` : 'Consistent selected coordinates');
+      const xs = [...new Set(markers.map(m => m.coordinates[0]))].sort((a, b) => a - b);
+      const intervals = new Set(markers.map(m => JSON.stringify(m.coordinates.slice(1))));
+      const checks = markers.length ? [`${position === 'shape' ? 'First X' : 'X_1'}: ${xs.map(number).join(' / ')}`] : ['No source coordinates'];
+      if (xs.length > 1) checks.push(`${xs.length} horizontal positions`);
+      if (intervals.size > 1) checks.push(`${intervals.size} screen intervals`);
+      if (elevationDifference) checks.push('screen-elevation fields differ');
+      if (originalXDifference) checks.push('first X differs from confirmed X_1');
+      cell(row, checks.join('; '));
       el('results').append(row);
     }
     for (const item of legendFor(analyte)) {
@@ -146,7 +155,7 @@ async function start() {
     el('profile').dataset.markerCount = String(screens.children.length);
     el('profile').dataset.wellCount = String(data.wells.length);
     if (affected.length) {
-      el('warning').textContent = `Position review: ${affected.join(', ')}. All supplied positions are retained; use Position comparison to inspect the alternatives.`;
+      el('warning').textContent = `Position checks: ${affected.join(', ')}. The default uses the confirmed second X field with unchanged exported screen elevations. Multiple positions and elevation differences remain visible; the other views are comparisons only.`;
       el('warning').hidden = false;
     }
     if (chosenWell) history(chosenWell);

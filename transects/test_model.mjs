@@ -50,6 +50,41 @@ test('duplicate positions merge but conflicting positions and results remain ins
   assert.equal(markersFor(well,'TCE','mr','joined',layout).length,1);
 });
 
+test('EPA-2 uses one joined X while retaining the original three screen intervals', () => {
+  const shape = [[6375.18,12580,12490],[6430.95,11680,11590],[7442.06,12780,12580]];
+  const corrected = shape.map(([, top, bottom]) => [7442.06, top, bottom]);
+  const well = {samples:{TCE:[{date:'1986-05-08',result:0,shape,
+    joinedX:corrected,joined:[[7442.06,12780,12580]]}]}};
+  const profile = {...layout,xDomain:[0,13000],xRange:[24,1154],yDomain:[425,660],yRange:[434,17]};
+  for (const mode of ['mr','max']) {
+    const markers = markersFor(well,'TCE',mode,'joinedX',profile);
+    const original = markersFor(well,'TCE',mode,'shape',profile);
+    assert.equal(markers.length,3);
+    assert.deepEqual([...new Set(markers.map(m => m.coordinates[0]))],[7442.06]);
+    assert.equal(new Set(markers.map(m => m.x)).size,1);
+    assert.deepEqual(markers.map(m => [m.y,m.height]),original.map(m => [m.y,m.height]));
+    assert.deepEqual(markers.flatMap(m => m.results),[0,0,0]);
+    assert.equal(markersFor(well,'TCE',mode,'joined',profile).length,1);
+  }
+});
+
+test('corrected positions retain subsegment pairs and same-day result ties', () => {
+  const well = {samples:{TCE:[
+    {date:'2025-03-11',result:2,joinedX:[[510,1600,1200],[560,1800,1400]]},
+    {date:'2025-03-11',result:4,joinedX:[[510,1600,1200]]},
+  ]}};
+  const markers = markersFor(well,'TCE','mr','joinedX',layout);
+  assert.deepEqual(markers.map(m => m.coordinates),[[510,1600,1200],[560,1800,1400]]);
+  assert.deepEqual(markers[0].results,[2,4]);
+  assert.deepEqual(markers[1].results,[2]);
+});
+
+test('corrected mode never silently falls back to the first X or joined elevations', () => {
+  const well = {samples:{TCE:[{date:'2025-03-11',result:0,
+    shape:[[500,1600,1200]],joined:[[510,1800,1400]]}]}};
+  assert.throws(() => markersFor(well,'TCE','mr','joinedX',layout));
+});
+
 test('relative assets and map links work under all three existing application prefixes', () => {
   for (const base of ['/AFP4/','/AFP04/','/storymap/afp4/']) {
     const page = `https://app.nuglobalsolutions.com${base}s2aa_mr.html`;
