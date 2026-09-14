@@ -2,7 +2,7 @@ import copy
 import struct
 import unittest
 
-from build import ANALYTES, REQUIRED, make_section, selected, page
+from build import ANALYTES, REQUIRED, coordinates, make_section, selected, page
 from shapefile import dbf, shapes
 
 
@@ -17,6 +17,56 @@ def fixture():
 
 
 class SelectionTests(unittest.TestCase):
+    def test_default_position_uses_joined_x_only(self):
+        markup = page('BB', 'max', '<svg></svg>', 'data.json', 'app.js', 'style.css')
+        self.assertIn('<select id="position"><option value="joinedX" selected>', markup)
+        self.assertIn('Corrected X; original screen elevations', markup)
+        self.assertIn('Original export (comparison)', markup)
+        self.assertIn('Joined X and elevations (comparison)', markup)
+
+    def test_joined_x_does_not_replace_exported_elevations(self):
+        row = fixture()['rows'][0]
+        row.update(X_1=510, exg_tos__1=1800, exg_bos__1=1400)
+        self.assertEqual(coordinates(row, 'joinedX'), (510, 1600, 1200))
+        self.assertEqual(coordinates(row, 'shape'), (500, 1600, 1200))
+        self.assertEqual(coordinates(row, 'joined'), (510, 1800, 1400))
+        with self.assertRaisesRegex(ValueError, 'geometry source'):
+            coordinates(row, 'unknown')
+
+    def test_corrected_coordinates_keep_each_raw_rows_x_elevation_pairing(self):
+        data = fixture()
+        data['rows'][0]['X_1'] = 510
+        extra = copy.deepcopy(data['rows'][0])
+        extra.update(Transect='A_A02', X=550, X_1=560, exg_tos_el=1800, exg_bos_el=1400)
+        data['rows'].append(extra)
+        data['shapes'].append([(550, 1800), (550, 1400)])
+        result, _ = make_section('AA', data, {})
+        sample = result['wells'][0]['samples']['TCE'][0]
+        self.assertEqual(sample['joinedX'], [(510, 1600, 1200), (560, 1800, 1400)])
+        self.assertEqual(sample['shape'], [(500, 1600, 1200), (550, 1800, 1400)])
+        self.assertEqual(sample['sourceRows'], [1, 4])
+
+    def test_epa2_horizontal_correction_preserves_three_exported_intervals(self):
+        data = fixture()
+        data['rows'], data['shapes'] = [], []
+        variants = [(6375.18, 12580, 12490), (6430.95, 11680, 11590), (7442.06, 12780, 12580)]
+        for x, top, bottom in variants:
+            for analyte in ANALYTES:
+                row = fixture()['rows'][0]
+                row.update(Well_ID='EPA-2', Transect='B_B09', Analyte=analyte,
+                           X=x, exg_tos_el=top, exg_bos_el=bottom, X_1=7442.06,
+                           exg_tos__1=12780, exg_bos__1=12580)
+                data['rows'].append(row)
+                data['shapes'].append([(x, top), (x, bottom)])
+        result, report = make_section('BB', data, {})
+        for samples in result['wells'][0]['samples'].values():
+            self.assertEqual(len(samples), 1)
+            self.assertEqual({p[0] for p in samples[0]['joinedX']}, {7442.06})
+            self.assertEqual({p[1:] for p in samples[0]['joinedX']}, {p[1:] for p in variants})
+            self.assertEqual(samples[0]['joined'], [(7442.06, 12780, 12580)])
+        self.assertEqual(report['correctedXSourceRows'], 6)
+        self.assertEqual(report['screenElevationSourceRowsDiffer'], 6)
+
     def test_authorized_production_review_keeps_position_warning(self):
         args = ('AA', 'mr', '<svg></svg>', 'data.json', 'app.js', 'style.css')
         self.assertIn('Local validation preview — not deployed', page(*args))
@@ -36,6 +86,18 @@ class SelectionTests(unittest.TestCase):
         self.assertIn('data-source="data.json"', hidden)
         with self.assertRaisesRegex(ValueError, 'authorized production review'):
             page(*args, hide_review_banners=True)
+
+    def test_release_candidate_preserves_presentation_without_claiming_deployment(self):
+        args = ('BB', 'max', '<svg></svg>', 'data.json', 'app.js', 'style.css')
+        shown = page(*args, release_candidate=True)
+        hidden = page(*args, release_candidate=True, hide_review_banners=True)
+        self.assertIn('Release candidate — not deployed', hidden)
+        self.assertEqual(hidden, shown.replace('data-review-banners="shown"', 'data-review-banners="hidden"'))
+        self.assertIn('<option value="joinedX" selected>', hidden)
+        self.assertIn('Position comparison', hidden)
+        self.assertIn('data-source="data.json"', hidden)
+        with self.assertRaisesRegex(ValueError, 'either a release candidate or production review'):
+            page(*args, production_review=True, release_candidate=True)
 
     def test_latest_does_not_mean_largest(self):
         rows=[{'date':'2024-01-01','result':99},{'date':'2025-01-01','result':0},{'date':'2025-01-01','result':1}]

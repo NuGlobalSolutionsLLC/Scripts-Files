@@ -25,6 +25,18 @@ application-build comparison and tracked nginx configuration. Merge approval
 does not resolve the remaining GIS questions or change this builder's default
 local-preview behavior.
 
+September 12 **unpublished correction**: Mary identified the second X field as
+the authoritative horizontal coordinate. New builds default to `X_1` while
+retaining each source row's original screen elevations. This has not been
+deployed; the production builds described above still use their original
+default. See `releases/2026-09-12-local-x.md` for local checks and remaining
+elevation questions.
+
+The user subsequently requested separate PRs for this fix, excluding the parked
+login changes. Use `--release-candidate --hide-review-banners` to prepare those
+unpublished application artifacts with the existing presentation preserved.
+This does not authorize deployment or imply full geometry approval.
+
 ## Inputs and repeatable build
 
 Requires Python 3.10+; the shipped viewer has no third-party JavaScript runtime
@@ -81,21 +93,27 @@ variants must come from the complete replacement ZIP.
 - Preserve the published color thresholds and background diagrams. Dates are
   computed from each actual history; no fixed 2020 cutoff remains.
 
-## Geometry review, not an automatic correction
+## Confirmed horizontal field and remaining geometry review
 
 The SHP profiles contain **distance/exaggerated-elevation screen lines**, not
 geographic map positions, despite their StatePlane projection declaration.
 Do not reproject them as though they were wells on a map.
 
 The original Vue components supply the display calibration, including the 20x
-elevation scale. The preview offers two distinct views:
+elevation scale. The preview offers three distinct views:
 
-1. **Exported screen geometry**: `X`, `exg_tos_el`, `exg_bos_el`, checked directly
+1. **Corrected X; original screen elevations** (default): `X_1`, `exg_tos_el`,
+   `exg_bos_el`. This applies Mary's September 12 horizontal-field correction
+   without assuming approval of the second set of elevation fields.
+2. **Original export (comparison)**: `X`, `exg_tos_el`, `exg_bos_el`, checked directly
    against SHP vertices.
-2. **Joined coordinate fields**: `X_1`, `exg_tos__1`, `exg_bos__1`.
+3. **Joined X and elevations (comparison)**: `X_1`, `exg_tos__1`, `exg_bos__1`.
 
-No field is silently substituted for another. Multiple positions are retained;
-dashed screens and the table identify cases needing review. Published geological
+Corrected coordinates are assembled per raw row before display deduplication,
+so X and elevation pairs from different subsegments cannot be mixed. No default
+fallback to the first X or joined elevations is allowed. Multiple positions
+are retained; dashed screens and the table identify cases needing review,
+separating horizontal positions from screen intervals. Published geological
 labels are static reference labels; click a colored screen or table well for its
 actual measurement identity and history.
 
@@ -105,15 +123,20 @@ many occur on adjacent subsegments. Examples:
 
 - AA / HM-106: along-section positions 1,976.01 and 2,007.25 feet for the same
   selected measurements and screen elevations.
-- BB / EPA-2 (Maximum): three exported screen geometries, but one joined
-  coordinate position; some screens also disagree in elevation.
+- BB / EPA-2 (Maximum): all 60 source rows have `X_1 = 7442.06`. The corrected
+  default aligns all screens at that X while retaining three original screen
+  intervals. The fully joined comparison has only one interval; the choice
+  of elevation fields remains unresolved.
 - FF / WJETA087: along-section positions 10,582.49 and 10,605.26 feet.
 
 Mary confirmed that a well may appear on multiple transects and should be shown
-relative to the displayed transect. This does not resolve the shape-versus-joined
-field discrepancy within the EPA-2 example. Merely choosing
-the first row, minimum perpendicular distance, most common geometry, or old
-published pixel position is not an approved resolution.
+relative to the displayed transect. Her September 12 clarification resolves
+which X field to use, but does not approve changing the screen elevations or
+collapsing distinct X values across subsegments. The second X is consistent
+within each well/subsegment in the checked inputs; 12 wells still have distinct
+values across subsegments. Merely choosing the first row, minimum perpendicular
+distance, most common geometry, or old published pixel position is not an
+approved resolution of those remaining differences.
 
 FF / HM-114 also has distinct same-day latest TCE results (310 and 330) and cis
 results (38 and 39). Both are preserved in the preview, history, table, and
@@ -138,7 +161,8 @@ updates. Do not point it at an already-rebuilt output.
 
 ## Production handoff, after source resolution and approval
 
-1. Resolve the position exceptions explicitly, add regression cases, remove the
+1. Resolve the remaining elevation/subsegment exceptions explicitly, retain the
+   confirmed `X_1` default and regression cases, remove the
    review-only coordinate selector/banner, and complete a release review.
 2. Rebuild and re-run source reconciliation, tests, and browser checks for all
    six sections × three analytes × two display modes, including well histories.
@@ -157,7 +181,11 @@ For an explicitly authorized production review, `--production-review` changes
 only the publication notice/metadata; it does not resolve geometry or select a
 different coordinate source. `--hide-review-banners` additionally hides the two
 banner messages without changing the underlying position checks. See the release
-record before using it. `sync_release.py --build <build> --application <app>`
+record before using it. For PR preparation only, `--release-candidate` instead
+labels the artifact as unpublished and leaves `productionReviewRequested` false;
+it also permits preserving the existing hidden-banner presentation. These two
+publication options are mutually exclusive, and neither performs a deployment.
+`sync_release.py --build <build> --application <app>`
 installs the 27 verified generated files into a clean local application's
 `public/` directory, preserving unrelated files and old assets. It performs no
 remote operation. Future application builds must retain these source copies.

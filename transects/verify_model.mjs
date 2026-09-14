@@ -15,8 +15,10 @@ for (const section of ['AA','BB','CC','DD','EE','FF']) {
       const expected = samples.filter(s => !samples.some(other => mode === 'mr' ? other.date > s.date : other.result > s.result));
       assert.deepEqual(actual,expected);
       selections++;
-      for (const position of ['shape','joined']) {
+      for (const position of ['joinedX','shape','joined']) {
         const markers = markersFor(well,analyte,mode,position,data.layout);
+        const expectedCoordinates = [...new Set(actual.flatMap(sample => sample[position]).map(p => JSON.stringify(p)))].sort();
+        assert.deepEqual(markers.map(m => JSON.stringify(m.coordinates)).sort(),expectedCoordinates);
         assert.deepEqual([...new Set(markers.flatMap(m=>m.results))].sort((a,b)=>a-b), [...new Set(actual.map(s=>s.result))].sort((a,b)=>a-b));
         for (const marker of markers) {
           assert.ok([marker.x,marker.y,marker.width,marker.height].every(Number.isFinite));
@@ -30,4 +32,3 @@ for (const section of ['AA','BB','CC','DD','EE','FF']) {
   }
 }
 console.log(JSON.stringify({verified:true,selections,positions}));
-

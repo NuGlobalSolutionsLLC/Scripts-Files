@@ -42,7 +42,7 @@ export function screenBox(coordinates, layout) {
 }
 
 export function markersFor(well, analyte, mode, position, layout) {
-  if (!['shape', 'joined'].includes(position)) throw new Error('Unknown geometry source');
+  if (!['joinedX', 'shape', 'joined'].includes(position)) throw new Error('Unknown geometry source');
   const groups = new Map();
   for (const sample of selectSamples(well.samples[analyte] || [], mode)) {
     for (const coordinates of sample[position]) {
@@ -55,4 +55,3 @@ export function markersFor(well, analyte, mode, position, layout) {
   return [...groups.values()].map(group => ({ ...screenBox(group.coordinates, layout),
     coordinates: group.coordinates, results: [...group.results].sort((a, b) => a - b), dates: [...group.dates].sort() }));
 }
-

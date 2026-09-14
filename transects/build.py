@@ -16,6 +16,9 @@ ANALYTES = {'TCE_ppb_l': 'TCE', 'Cis12DCE_ppb_l': 'CIS12DCE', 'VC_ppb_l': 'VC'}
 LABELS = {'TCE': 'Trichloroethylene', 'CIS12DCE': 'cis-1,2-Dichloroethylene', 'VC': 'Vinyl chloride'}
 REQUIRED = ('Well_ID', 'SDate', 'Matrix', 'Analyte', 'Result', 'Transect',
             'X', 'exg_tos_el', 'exg_bos_el', 'X_1', 'exg_tos__1', 'exg_bos__1', 'PerpDist')
+POSITION_FIELDS = {'joinedX': ('X_1', 'exg_tos_el', 'exg_bos_el'),
+                   'shape': ('X', 'exg_tos_el', 'exg_bos_el'),
+                   'joined': ('X_1', 'exg_tos__1', 'exg_bos__1')}
 
 
 def selected(samples, mode):
@@ -29,8 +32,8 @@ def selected(samples, mode):
 
 
 def coordinates(row, source):
-    fields = ('X', 'exg_tos_el', 'exg_bos_el') if source == 'shape' else ('X_1', 'exg_tos__1', 'exg_bos__1')
-    return tuple(row[key] for key in fields)
+    require(source in POSITION_FIELDS, 'Unknown geometry source')
+    return tuple(row[key] for key in POSITION_FIELDS[source])
 
 
 def make_section(sec, dataset, published):
@@ -58,16 +61,19 @@ def make_section(sec, dataset, published):
         row_counts[analyte] += 1
         key = (analyte, row['SDate'], row['Result'])
         sample = grouped[row['Well_ID']].setdefault(key, {'date': row['SDate'], 'result': row['Result'],
-                                                           'shape': set(), 'joined': set(), 'sourceRows': []})
+                                                           'shape': set(), 'joined': set(), 'joinedX': set(), 'sourceRows': []})
         sample['shape'].add(shape)
         sample['joined'].add(joined)
+        # Pair the confirmed X with this raw row's original screen interval before
+        # deduplication; independent coordinate sets would lose subsegment pairing.
+        sample['joinedX'].add(coordinates(row, 'joinedX'))
         sample['sourceRows'].append(number)
     require(set(row_counts) == set(LABELS), f'{sec}: all three analytes are required')
     wells, issues = [], []
     for well, records in sorted(grouped.items()):
         samples = {a: [] for a in LABELS}
         for (analyte, _, _), value in sorted(records.items()):
-            samples[analyte].append({**value, 'shape': sorted(value['shape']), 'joined': sorted(value['joined'])})
+            samples[analyte].append({**value, **{source: sorted(value[source]) for source in POSITION_FIELDS}})
         old = published.get(sec + '/' + well)
         wells.append({'id': well, 'samples': samples, 'publishedBox': old})
         for analyte, measurements in samples.items():
@@ -80,15 +86,20 @@ def make_section(sec, dataset, published):
                 values = {r['result'] for r in chosen}
                 if len(shape) > 1 or len(joined) > 1 or shape != joined or len(values) > 1:
                     issues.append({'well': well, 'analyte': analyte, 'mode': mode, 'shape': sorted(shape),
-                                   'joined': sorted(joined), 'results': sorted(values)})
+                                   'joined': sorted(joined),
+                                   'joinedX': sorted({tuple(p) for r in chosen for p in r['joinedX']}),
+                                   'results': sorted(values)})
     unique = sum(len(rows) for w in wells for rows in w['samples'].values())
     report = {'sourceRows': len(dataset['rows']), 'uniqueMeasurementKeys': unique, 'repeatedRows': len(dataset['rows']) - unique,
               'wells': len(wells), 'analytes': {a: {'rows': row_counts[a], 'uniqueMeasurementKeys': sum(len(w['samples'][a]) for w in wells),
                                                   'latest': max(r['date'] for w in wells for r in w['samples'][a])} for a in LABELS},
               'shapeAttributeDisagreements': geometry_disagreements, 'selectedResultReview': issues,
+              'correctedXSourceRows': sum(abs(r['X'] - r['X_1']) > .001 for r in dataset['rows']),
+              'screenElevationSourceRowsDiffer': sum(any(abs(a - b) > .001 for a, b in zip(
+                  coordinates(r, 'shape')[1:], coordinates(r, 'joined')[1:])) for r in dataset['rows']),
               'newWells': [w['id'] for w in wells if w['publishedBox'] is None],
               'omittedPublishedWells': sorted(k.split('/', 1)[1] for k in published if k.startswith(sec + '/') and k.split('/', 1)[1] not in grouped)}
-    return {'section': sec, 'labels': LABELS, 'wells': wells,
+    return {'section': sec, 'labels': LABELS, 'wells': wells, 'defaultPosition': 'joinedX',
             'latest': max(r['SDate'] for r in dataset['rows']),
             'reviewWells': sorted({r['well'] for r in issues})}, report
 
@@ -105,8 +116,11 @@ def write_asset(root, name, content):
     return relative.as_posix()
 
 
-def page(sec, mode, svg, data_url, script_url, style_url, production_review=False, hide_review_banners=False):
-    require(not hide_review_banners or production_review, 'Hiding review banners requires an authorized production review')
+def page(sec, mode, svg, data_url, script_url, style_url, production_review=False, hide_review_banners=False,
+         release_candidate=False):
+    require(not (production_review and release_candidate), 'Choose either a release candidate or production review')
+    require(not hide_review_banners or production_review or release_candidate,
+            'Hiding review banners requires an authorized production review or an unpublished release candidate')
     title = sec[0] + '–' + sec[1]
     options = ''.join(f'<option value="{a}">{html.escape(label)}</option>' for a, label in LABELS.items())
     modes = ''.join(f'<option value="{m}"{" selected" if m == mode else ""}>{label}</option>'
@@ -114,6 +128,9 @@ def page(sec, mode, svg, data_url, script_url, style_url, production_review=Fals
     notice = ('Updated transect data — screen positioning is awaiting GIS review. Original diagrams are unchanged.'
               if production_review else
               'Local validation preview — not deployed. Original diagrams are unchanged. Well-position checks are pending.')
+    if release_candidate:
+        notice = 'Release candidate — not deployed. Original diagrams are unchanged. Screen-elevation review is pending.'
+    notice += ' Default: confirmed second X field; original screen elevations.'
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AFP4 transect {title} — {"Most Recent" if mode == "mr" else "Maximum Value"}</title>
@@ -124,7 +141,7 @@ def page(sec, mode, svg, data_url, script_url, style_url, production_review=Fals
 <p class="preview">{notice}</p>
 <div class="controls"><label>Data display <select id="mode">{modes}</select></label>
 <label>Analyte <select id="analyte"><option value="">Choose an analyte</option>{options}</select></label>
-<label>Position comparison <select id="position"><option value="shape">Exported screen geometry</option><option value="joined">Joined coordinate fields</option></select></label></div>
+<label>Position comparison <select id="position"><option value="joinedX" selected>Corrected X; original screen elevations</option><option value="shape">Original export (comparison)</option><option value="joined">Joined X and elevations (comparison)</option></select></label></div>
 <p id="status" role="status">Loading transect data…</p><p id="warning" class="warning" hidden></p>
 <main><div class="diagram">{svg}</div><div id="legend" class="legend" aria-label="Concentration legend"></div>
 <section aria-labelledby="history-title"><h2 id="history-title">Well history</h2><p id="detail">Choose an analyte, then click a screen or a well in the table.</p>
@@ -139,10 +156,13 @@ def main():
     parser.add_argument('--transects', type=pathlib.Path, required=True, help='B–F source ZIP; its older A–A is deliberately ignored')
     parser.add_argument('--aa', type=pathlib.Path, required=True, help='Complete replacement A–A ZIP')
     parser.add_argument('--output', type=pathlib.Path, required=True, help='New, empty, isolated build directory')
-    parser.add_argument('--production-review', action='store_true', help='Use only with explicit approval to publish while GIS review remains pending')
-    parser.add_argument('--hide-review-banners', action='store_true', help='Presentation-only: hide the two review banners with explicit approval; retains comparison, data, and position checks')
+    publication = parser.add_mutually_exclusive_group()
+    publication.add_argument('--production-review', action='store_true', help='Use only with explicit approval to publish while GIS review remains pending')
+    publication.add_argument('--release-candidate', action='store_true', help='Prepare an unpublished PR artifact without claiming deployment approval')
+    parser.add_argument('--hide-review-banners', action='store_true', help='Preserve the approved hidden-banner presentation in a release candidate or authorized production review; retains comparison, data, and position checks')
     args = parser.parse_args()
-    require(not args.hide_review_banners or args.production_review, 'Hiding review banners requires an authorized production review')
+    require(not args.hide_review_banners or args.production_review or args.release_candidate,
+            'Hiding review banners requires an authorized production review or an unpublished release candidate')
     require(not args.output.exists(), 'Output must be a new directory; never overwrite an application or earlier build')
     base_stems = {f's2{s.lower()}_{m}' for s in SECTIONS[1:] for m in ['mr', 'max']}
     datasets = archive(args.transects, base_stems)
@@ -172,16 +192,20 @@ def main():
         data_url = write_asset(args.output, f'{sec}.json', json.dumps(data, separators=(',', ':'), allow_nan=False))
         for mode in ['mr', 'max']:
             filename = f's2{sec.lower()}_{mode}.html'
-            (args.output / filename).write_text(page(sec, mode, svg, data_url, app_url, style_url, args.production_review, args.hide_review_banners))
+            (args.output / filename).write_text(page(sec, mode, svg, data_url, app_url, style_url,
+                                                    args.production_review, args.hide_review_banners, args.release_candidate))
             files.append(filename)
     review = {'productionReady': False, 'reason': 'Local draft: coordinate reconciliation and release approval are required.',
-              'productionReviewRequested': args.production_review, 'geometryApproved': False,
+              'productionReviewRequested': args.production_review, 'releaseCandidate': args.release_candidate, 'geometryApproved': False,
               'reviewBannersVisible': not args.hide_review_banners,
               'selectionPolicy': 'Latest date retains every distinct result; maximum retains every tied sample date. No averages, invented flags or old-history gap filling.',
-              'geometryPolicy': 'Preview presents original screen geometry and joined attributes separately. No coordinate choice or geographic reprojection is applied.',
+              'defaultPosition': 'joinedX', 'defaultPositionFields': list(POSITION_FIELDS['joinedX']),
+              'geometryPolicy': 'Default uses the confirmed second X field (X_1) with each raw row\'s unchanged exported screen elevations. Original and fully joined coordinates remain comparison-only. Screen-elevation authority remains unresolved; no geographic reprojection is applied.',
               'sources': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in [args.transects, args.aa]}, 'sections': sections}
     if args.production_review:
-        review['reason'] = 'User authorized production publication for client review; coordinate authority remains unresolved. Banner visibility is a presentation choice, not geometry approval.'
+        review['reason'] = 'User authorized production publication for client review; X_1 is the confirmed horizontal field, but screen-elevation authority remains unresolved. Banner visibility is a presentation choice, not geometry approval.'
+    elif args.release_candidate:
+        review['reason'] = 'Unpublished PR release candidate; deployment requires separate approval. X_1 is the confirmed horizontal field; screen-elevation authority remains unresolved.'
     (args.output / 'validation.json').write_text(json.dumps(review, indent=2) + '\n')
     links = ''.join(f'<li><a href="{f}">{f}</a></li>' for f in files)
     (args.output / 'review.html').write_text(f'<!doctype html><html lang="en"><meta charset="utf-8"><title>AFP4 local transect review</title><h1>AFP4 local transect review</h1><p>Not deployed. Review all six sections, three analytes and both display modes.</p><ul>{links}</ul><a href="validation.json">Validation report</a></html>')
